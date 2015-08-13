@@ -3,6 +3,7 @@ package com.oehm.unitycastandroid;
 import android.os.Bundle;
 import android.support.v7.media.MediaRouteSelector;
 import android.support.v7.media.MediaRouter;
+import android.widget.Toast;
 
 import com.google.android.gms.cast.CastDevice;
 import com.google.android.gms.cast.CastMediaControlIntent;
@@ -19,6 +20,8 @@ public class MainActivity extends UnityPlayerNativeActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        Toast.makeText(this, "v2", Toast.LENGTH_LONG).show();
 
         // Configure Cast device discovery
         mMediaRouter = MediaRouter.getInstance(getApplicationContext());
