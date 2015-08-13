@@ -1,0 +1,46 @@
+[Bb]uilds/
+
+*.meta
+!*.*.meta
+
+# =============== #
+# Unity generated #
+# =============== #
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Tt]emp.meta
+ 
+# ===================================== #
+# Visual Studio / MonoDevelop generated #
+# ===================================== #
+ExportedObj/
+*.svd
+*.userprefs
+*.csproj
+*.pidb
+*.suo
+*.sln
+*.user
+*.unityproj
+*.booproj
+ 
+# ============ #
+# OS generated #
+# ============ #
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Icon?
+ehthumbs.db
+Thumbs.db
+
+# ================= #
+# UnityVS generated #
+# ================= #
+*.[Vv]ersion[Ss]pecific.dll
+*.[Vv]ersion[Ss]pecific.dll.meta
+[Uu]nityVS/[Ee]ditor/*.dll
+[Uu]nityVS/[Ee]ditor/*.dll.meta
