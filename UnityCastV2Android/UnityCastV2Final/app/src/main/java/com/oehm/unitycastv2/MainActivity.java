@@ -9,12 +9,19 @@ import android.support.v7.media.MediaRouter;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 
 import com.google.android.gms.cast.ApplicationMetadata;
+import com.google.android.gms.cast.MediaInfo;
+import com.google.android.gms.cast.MediaMetadata;
 import com.google.android.libraries.cast.companionlibrary.cast.VideoCastManager;
 import com.google.android.libraries.cast.companionlibrary.cast.callbacks.VideoCastConsumer;
 import com.google.android.libraries.cast.companionlibrary.cast.callbacks.VideoCastConsumerImpl;
+import com.google.android.libraries.cast.companionlibrary.cast.exceptions.NoConnectionException;
+import com.google.android.libraries.cast.companionlibrary.cast.exceptions.TransientNetworkDisconnectionException;
 import com.google.android.libraries.cast.companionlibrary.cast.player.VideoCastControllerActivity;
+
+import java.net.Socket;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -41,8 +48,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         mCastManager = VideoCastManager.getInstance();
-
-
     }
 
 
@@ -94,5 +99,32 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         Log.d(TAG, "onDestroy is called");
         super.onDestroy();
+    }
+
+    public void startUnity(View view) {
+        // Do something in response to button
+
+
+        if(mCastManager.isConnected()){
+
+            MediaMetadata mediaMetadata = new MediaMetadata(MediaMetadata.MEDIA_TYPE_MOVIE);
+            mediaMetadata.putString(MediaMetadata.KEY_TITLE, "Demo Video");
+
+            try {
+                mCastManager.loadMedia(new MediaInfo.Builder(
+                        "http://video.webmfiles.org/big-buck-bunny_trailer.webm")
+                        .setContentType("video/webm")
+                        .setStreamType(MediaInfo.STREAM_TYPE_BUFFERED)
+                        .setMetadata(mediaMetadata)
+                        .build(),true,0);
+
+            } catch (TransientNetworkDisconnectionException | NoConnectionException e) {
+                e.printStackTrace();
+            }
+        }
+
+
+        Intent intent = new Intent(this, CustomUnityPlayerActivity.class);
+        startActivity(intent);
     }
 }
