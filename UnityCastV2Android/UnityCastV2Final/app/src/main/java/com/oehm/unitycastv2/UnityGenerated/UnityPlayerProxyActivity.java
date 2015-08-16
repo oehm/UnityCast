@@ -1,6 +1,5 @@
-package com.oehm.unitycastv2;
+package com.oehm.unitycastv2.UnityGenerated;
 
-import com.unity3d.player.*;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -14,7 +13,7 @@ public class UnityPlayerProxyActivity extends Activity
 	{
 		super.onCreate(savedInstanceState);
 
-		Intent intent = new Intent(this, com.oehm.unitycastv2.UnityPlayerActivity.class);
+		Intent intent = new Intent(this, UnityPlayerActivity.class);
 		intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
 		Bundle extras = getIntent().getExtras();
 		if (extras != null)

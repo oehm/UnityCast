@@ -2,8 +2,13 @@
 <resources>
 
     <string name="app_name">UnityCastV2</string>
+    <string name="app_id">com.oehm.unitycastv2</string>
+    <string name="remote_display_app_id">D67240EF</string>
     <string name="title_activity_main">MainActivity</string>
     <string name="action_settings">Settings</string>
-    <string name="StartButtton">Start</string>
+    <string name="StartButtton">Start without stream</string>
+    <string name="media_route_menu_title">cast</string>
+    <string name="init_error">Error starting the stream</string>
+    <string name="play">Start with stream</string>
 
 </resources>

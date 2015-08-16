@@ -1,7 +1,7 @@
-package com.oehm.unitycastv2;
+package com.oehm.unitycastv2.UnityGenerated;
 
 import com.unity3d.player.*;
-import android.app.Activity;
+import android.app.NativeActivity;
 import android.content.res.Configuration;
 import android.graphics.PixelFormat;
 import android.os.Bundle;
@@ -11,7 +11,7 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 
-public class UnityPlayerActivity extends Activity
+public class UnityPlayerNativeActivity extends NativeActivity
 {
 	protected UnityPlayer mUnityPlayer; // don't change the name of this variable; referenced from native code
 
@@ -21,6 +21,7 @@ public class UnityPlayerActivity extends Activity
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		super.onCreate(savedInstanceState);
 
+		getWindow().takeSurface(null);
 		getWindow().setFormat(PixelFormat.RGBX_8888); // <--- This makes xperia play happy
 
 		mUnityPlayer = new UnityPlayer(this);

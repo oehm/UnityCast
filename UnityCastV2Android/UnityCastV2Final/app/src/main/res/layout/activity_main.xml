@@ -1,6 +1,9 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
-    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:custom="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     android:paddingBottom="@dimen/activity_vertical_margin"
@@ -11,7 +14,21 @@
         android:layout_height="wrap_content"
         android:text="@string/StartButtton"
         android:id="@+id/button"
-        android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true"
-        android:onClick="startUnity"/>
+        android:onClick="startUnity"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true" />
+
+    <com.oehm.unitycastv2.MediaRouterButtonView
+        android:id="@+id/media_route_button_view"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:gravity="center_vertical|center_horizontal"
+        android:layout_centerInParent="true"
+        custom:buttonText="@string/play"
+        android:background="@drawable/orange_button"
+        android:paddingTop="1dp"
+        android:paddingBottom="1dp"
+        android:paddingRight="20dp"
+        android:paddingLeft="1dp"
+        android:visibility="gone"/>
 </RelativeLayout>

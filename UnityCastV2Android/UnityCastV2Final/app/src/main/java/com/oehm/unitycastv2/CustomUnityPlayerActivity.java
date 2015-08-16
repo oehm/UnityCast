@@ -6,13 +6,12 @@ import android.graphics.Paint;
 import android.media.MediaRecorder;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.Handler;
 import android.util.Log;
-import android.view.Choreographer;
 import android.view.Surface;
 import android.view.View;
 
-import java.io.FileDescriptor;
+import com.oehm.unitycastv2.UnityGenerated.UnityPlayerActivity;
+
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -34,6 +33,8 @@ public class CustomUnityPlayerActivity extends UnityPlayerActivity
     @Override protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
+
+        View asd = mUnityPlayer.getView();
 
 //        class MyFrameCallback implements Choreographer.FrameCallback {
 //

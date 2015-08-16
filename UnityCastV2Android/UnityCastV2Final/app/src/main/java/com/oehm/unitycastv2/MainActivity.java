@@ -1,82 +1,106 @@
 package com.oehm.unitycastv2;
 
+import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.Intent;
-import android.os.Handler;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.app.MediaRouteButton;
+import android.support.v7.media.MediaRouteSelector;
 import android.support.v7.media.MediaRouter;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 
-import com.google.android.gms.cast.ApplicationMetadata;
-import com.google.android.gms.cast.MediaInfo;
-import com.google.android.gms.cast.MediaMetadata;
-import com.google.android.libraries.cast.companionlibrary.cast.VideoCastManager;
-import com.google.android.libraries.cast.companionlibrary.cast.callbacks.VideoCastConsumer;
-import com.google.android.libraries.cast.companionlibrary.cast.callbacks.VideoCastConsumerImpl;
-import com.google.android.libraries.cast.companionlibrary.cast.exceptions.NoConnectionException;
-import com.google.android.libraries.cast.companionlibrary.cast.exceptions.TransientNetworkDisconnectionException;
-import com.google.android.libraries.cast.companionlibrary.cast.player.VideoCastControllerActivity;
-
-import java.net.Socket;
+import com.google.android.gms.cast.CastDevice;
+import com.google.android.gms.cast.CastMediaControlIntent;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.oehm.unitycastv2.UnityGenerated.UnityPlayerActivity;
 
 
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
+    protected static final String INTENT_EXTRA_CAST_DEVICE = "CastDevice";
 
+    private MediaRouter mMediaRouter;
+    private MediaRouteSelector mMediaRouteSelector;
+    private MediaRouteButton mMediaRouteButton;
+    private int mRouteCount = 0;
+    private MediaRouterButtonView mMediaRouterButtonView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        checkGooglePlayServices();
 
-    }
+        setContentView(R.layout.activity_main);
 
+        mMediaRouteSelector = new MediaRouteSelector.Builder()
+                .addControlCategory(
+                        CastMediaControlIntent.categoryForCast(getString(R.string.remote_display_app_id)))
+                .build();
+        mMediaRouter = MediaRouter.getInstance(getApplicationContext());
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        super.onCreateOptionsMenu(menu);
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        // Set the MediaRouteButton selector for device discovery.
+        mMediaRouterButtonView = (MediaRouterButtonView) findViewById(R.id.media_route_button_view);
+        if (mMediaRouterButtonView != null) {
+            mMediaRouteButton = mMediaRouterButtonView.getMediaRouteButton();
+            mMediaRouteButton.setRouteSelector(mMediaRouteSelector);
         }
-
-        return super.onOptionsItemSelected(item);
     }
 
     @Override
-    protected void onResume() {
-        Log.d(TAG, "onResume() was called");
-
-        super.onResume();
+    protected void onStart() {
+        super.onStart();
+        mMediaRouter.addCallback(mMediaRouteSelector, mMediaRouterCallback,
+                MediaRouter.CALLBACK_FLAG_REQUEST_DISCOVERY);
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
+    protected void onStop() {
+        super.onStop();
+        mMediaRouter.removeCallback(mMediaRouterCallback);
     }
 
-    @Override
-    protected void onDestroy() {
-        Log.d(TAG, "onDestroy is called");
-        super.onDestroy();
-    }
+    private final MediaRouter.Callback mMediaRouterCallback =
+            new MediaRouter.Callback() {
+                @Override
+                public void onRouteAdded(MediaRouter router, MediaRouter.RouteInfo route) {
+                    if (++mRouteCount >= 1) {
+                        // Show the button when a device is discovered.
+                        if (mMediaRouterButtonView != null) {
+                            mMediaRouterButtonView.setVisibility(View.VISIBLE);
+                        }
+                    }
+                }
+
+                @Override
+                public void onRouteRemoved(MediaRouter router, MediaRouter.RouteInfo route) {
+                    if (--mRouteCount <= 0) {
+                        // Hide the button if there are no devices discovered.
+                        if (mMediaRouterButtonView != null) {
+                            mMediaRouterButtonView.setVisibility(View.GONE);
+                        }
+                    }
+                }
+
+                @Override
+                public void onRouteSelected(MediaRouter router, MediaRouter.RouteInfo info) {
+                    Log.d(TAG, "onRouteSelected");
+                    CastDevice castDevice = CastDevice.getFromBundle(info.getExtras());
+                    if (castDevice != null) {
+                        Intent intent = new Intent(MainActivity.this,
+                                CastingActivity.class);
+                        intent.putExtra(INTENT_EXTRA_CAST_DEVICE, castDevice);
+                        startActivity(intent);
+                    }
+                }
+
+                @Override
+                public void onRouteUnselected(MediaRouter router, MediaRouter.RouteInfo info) {
+                }
+            };
 
     public void startUnity(View view) {
         // Do something in response to button
@@ -84,4 +108,28 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(this, UnityPlayerActivity.class);
         startActivity(intent);
     }
+
+    /**
+     * A utility method to validate that the appropriate version of the Google Play Services is
+     * available on the device. If not, it will open a dialog to address the issue. The dialog
+     * displays a localized message about the error and upon user confirmation (by tapping on
+     * dialog) will direct them to the Play Store if Google Play services is out of date or
+     * missing, or to system settings if Google Play services is disabled on the device.
+     */
+    private boolean checkGooglePlayServices() {
+        int googlePlayServicesCheck = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
+        if (googlePlayServicesCheck == ConnectionResult.SUCCESS) {
+            return true;
+        }
+        Dialog dialog = GooglePlayServicesUtil.getErrorDialog(googlePlayServicesCheck, this, 0);
+        dialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+            @Override
+            public void onCancel(DialogInterface dialogInterface) {
+                finish();
+            }
+        });
+        dialog.show();
+        return false;
+    }
+
 }
