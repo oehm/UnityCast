@@ -18,6 +18,8 @@ package com.oehm.unitycastv2;
 
 import android.app.PendingIntent;
 import android.content.Intent;
+import android.content.res.Configuration;
+import android.graphics.PixelFormat;
 import android.os.Bundle;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -26,9 +28,13 @@ import android.support.v7.media.MediaRouteSelector;
 import android.support.v7.media.MediaRouter;
 import android.support.v7.media.MediaRouter.RouteInfo;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.google.android.gms.cast.CastDevice;
@@ -73,12 +79,24 @@ public class CastingActivity extends AppCompatActivity
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+
         super.onCreate(savedInstanceState);
 
-        mUnityPlayer = new UnityPlayer(this);
+        getWindow().setFormat(PixelFormat.RGBX_8888); // <--- This makes xperia play happy
 
-//        setContentView(R.layout.activity_casting);
-        setContentView(mUnityPlayer);
+        mUnityPlayer = new UnityPlayer(this);
+        if (mUnityPlayer.getSettings ().getBoolean ("hide_status_bar", true))
+        {
+            getWindow ().setFlags (WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                    WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        }
+
+//        setContentView(mUnityPlayer);
+        mUnityPlayer.requestFocus();
+
+        setContentView(R.layout.activity_casting);
 
         mMediaRouter = MediaRouter.getInstance(getApplicationContext());
         mMediaRouteSelector = new MediaRouteSelector.Builder()
@@ -125,19 +143,52 @@ public class CastingActivity extends AppCompatActivity
                 startCastService(mCastDevice);
             }
         }
+        mUnityPlayer.resume();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         mMediaRouter.unselect(MediaRouter.UNSELECT_REASON_STOPPED);
+        mUnityPlayer.pause();
     }
 
     @Override
     protected void onDestroy() {
+        mUnityPlayer.quit();
         super.onDestroy();
         mMediaRouter.removeCallback(mMediaRouterCallback);
     }
+
+
+    // This ensures the layout will be correct.
+    @Override public void onConfigurationChanged(Configuration newConfig)
+    {
+        super.onConfigurationChanged(newConfig);
+        mUnityPlayer.configurationChanged(newConfig);
+    }
+
+    // Notify Unity of the focus change.
+    @Override public void onWindowFocusChanged(boolean hasFocus)
+    {
+        super.onWindowFocusChanged(hasFocus);
+        mUnityPlayer.windowFocusChanged(hasFocus);
+    }
+
+    // For some reason the multiple keyevent type is not supported by the ndk.
+    // Force event injection by overriding dispatchKeyEvent().
+    @Override public boolean dispatchKeyEvent(KeyEvent event)
+    {
+        if (event.getAction() == KeyEvent.ACTION_MULTIPLE)
+            return mUnityPlayer.injectEvent(event);
+        return super.dispatchKeyEvent(event);
+    }
+
+    // Pass any events not handled by (unfocused) views straight to UnityPlayer
+    @Override public boolean onKeyUp(int keyCode, KeyEvent event)     { return mUnityPlayer.injectEvent(event); }
+    @Override public boolean onKeyDown(int keyCode, KeyEvent event)   { return mUnityPlayer.injectEvent(event); }
+    @Override public boolean onTouchEvent(MotionEvent event)          { return mUnityPlayer.injectEvent(event); }
+    /*API12*/ public boolean onGenericMotionEvent(MotionEvent event)  { return mUnityPlayer.injectEvent(event); }
 
     private boolean isRemoteDisplaying() {
         return CastRemoteDisplayLocalService.getInstance() != null;

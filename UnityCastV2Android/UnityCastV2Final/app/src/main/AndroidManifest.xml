@@ -66,8 +66,8 @@
             android:launchMode="singleTop"
             android:screenOrientation="portrait" >
             <meta-data
-            android:name="unityplayer.UnityActivity"
-            android:value="true" />
+                android:name="unityplayer.UnityActivity"
+                android:value="true" />
         </activity>
 
         <!--<service-->

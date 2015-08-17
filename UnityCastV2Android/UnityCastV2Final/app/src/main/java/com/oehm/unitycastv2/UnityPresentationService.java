@@ -85,9 +85,9 @@ public class UnityPresentationService extends CastRemoteDisplayLocalService
             super.onCreate(savedInstanceState);
             //set Content on tv
             if(mUnityPlayer != null){
-                setContentView(R.layout.presentation_main);
+//                setContentView(R.layout.presentation_main);
 
-                //setContentView(mUnityPlayer);
+                setContentView(mUnityPlayer);
                 mUnityPlayer.requestFocus();
                 mUnityPlayer.resume();
                 Log.d(TAG, "unity player was ALMOST set as content view.");
