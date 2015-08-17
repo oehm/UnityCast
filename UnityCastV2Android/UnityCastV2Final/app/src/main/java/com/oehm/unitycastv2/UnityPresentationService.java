@@ -4,14 +4,20 @@ import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Display;
+import android.view.View;
 import android.view.WindowManager;
 
 import com.google.android.gms.cast.CastPresentation;
 import com.google.android.gms.cast.CastRemoteDisplayLocalService;
+import com.unity3d.player.UnityPlayer;
 
-public class UnityPresentationService extends CastRemoteDisplayLocalService {
+public class UnityPresentationService extends CastRemoteDisplayLocalService
+{
 
     private static final String TAG = "UnityPresentationServic";
+
+
+    public UnityPlayer mUnityPlayer;
 
     private CastPresentation mPresentation;
 
@@ -32,6 +38,11 @@ public class UnityPresentationService extends CastRemoteDisplayLocalService {
     }
 
     private void dismissPresentation() {
+
+//        if(mUnityPlayer != null){
+//            mUnityPlayer.quit();
+//        }
+
         if (mPresentation != null) {
             mPresentation.dismiss();
             mPresentation = null;
@@ -39,7 +50,9 @@ public class UnityPresentationService extends CastRemoteDisplayLocalService {
     }
 
     private void createPresentation(Display display) {
+
         dismissPresentation();
+
         mPresentation = new UnityCastPresentation(this, display);
 
         try {
@@ -70,9 +83,21 @@ public class UnityPresentationService extends CastRemoteDisplayLocalService {
         @Override
         protected void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
-
             //set Content on tv
-            setContentView(R.layout.presentation_main);
+            if(mUnityPlayer != null){
+                setContentView(R.layout.presentation_main);
+
+                //setContentView(mUnityPlayer);
+                mUnityPlayer.requestFocus();
+                mUnityPlayer.resume();
+                Log.d(TAG, "unity player was ALMOST set as content view.");
+
+            }
+            else {
+
+                setContentView(R.layout.presentation_main);
+                Log.e(TAG, "unity player was not assigned in time.");
+            }
 
         }
     }

@@ -35,6 +35,7 @@ import com.google.android.gms.cast.CastDevice;
 import com.google.android.gms.cast.CastMediaControlIntent;
 import com.google.android.gms.cast.CastRemoteDisplayLocalService;
 import com.google.android.gms.common.api.Status;
+import com.unity3d.player.UnityPlayer;
 
 /**
  * <h3>CastRemoteDisplayActivity</h3>
@@ -53,7 +54,9 @@ import com.google.android.gms.common.api.Status;
  * to the Android log which you can read using <code>adb logcat</code>.
  * </p>
  */
-public class CastingActivity extends AppCompatActivity {
+public class CastingActivity extends AppCompatActivity
+{
+    protected UnityPlayer mUnityPlayer; // don't change the name of this variable; referenced from native code
 
     private final String TAG = "CastingActivity";
 
@@ -72,7 +75,10 @@ public class CastingActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_casting);
+        mUnityPlayer = new UnityPlayer(this);
+
+//        setContentView(R.layout.activity_casting);
+        setContentView(mUnityPlayer);
 
         mMediaRouter = MediaRouter.getInstance(getApplicationContext());
         mMediaRouteSelector = new MediaRouteSelector.Builder()
@@ -174,13 +180,23 @@ public class CastingActivity extends AppCompatActivity {
                         .setNotificationPendingIntent(notificationPendingIntent).build();
 
         CastRemoteDisplayLocalService.startService(CastingActivity.this,
-                PresentationService.class, getString(R.string.remote_display_app_id),
+                UnityPresentationService.class, getString(R.string.remote_display_app_id),
                 castDevice, settings,
                 new CastRemoteDisplayLocalService.Callbacks() {
                     @Override
                     public void onRemoteDisplaySessionStarted(
                             CastRemoteDisplayLocalService service) {
                         Log.d(TAG, "onServiceStarted");
+
+                        UnityPresentationService unityService;
+                        try {
+                            unityService = (UnityPresentationService) service;
+                        }
+                        catch (ClassCastException e){
+                            Log.e(TAG, "the service was not a UnityPresentationService.");
+                            return;
+                        }
+                        unityService.mUnityPlayer = mUnityPlayer;
                     }
 
                     @Override
