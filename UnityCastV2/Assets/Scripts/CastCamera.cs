@@ -30,7 +30,7 @@ public class CastCamera : MonoBehaviour
 			_camera.enabled = true;
 
 			if ( debugObject != null )
-				debugObject.GetComponent<Renderer>( ).material.color = Color.red;
+				debugObject.GetComponent<Renderer>( ).material.color = Color.green;
 		}
 		if ( Display.displays.Length < _displayIndex )
 		{
@@ -42,8 +42,6 @@ public class CastCamera : MonoBehaviour
 	public void HandleNativeMessage ( string message )
 	{
 
-		if ( debugObject != null )
-			debugObject.GetComponent<Renderer>( ).material.color = Color.yellow;
 
 		string[] parameter = message.Split( ',' );
 
@@ -51,6 +49,9 @@ public class CastCamera : MonoBehaviour
 		{
 			if ( parameter[0].Equals( "SetResolution" ) && parameter.Length == 3 )
 			{
+				if ( debugObject != null )
+					debugObject.GetComponent<Renderer>( ).material.color = Color.red;
+
 				SetResolution( int.Parse( parameter[1] ), int.Parse( parameter[2] ), int.Parse( parameter[3] ) );
 			}
 		}
@@ -66,7 +67,7 @@ public class CastCamera : MonoBehaviour
 			Display.displays[_displayIndex].SetRenderingResolution( width, height );
 
 			if ( debugObject != null )
-				debugObject.GetComponent<Renderer>( ).material.color = Color.green;
+				debugObject.GetComponent<Renderer>( ).material.color = Color.yellow;
 		}
 
 		_isResolutionSet = true;

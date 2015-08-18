@@ -100,7 +100,7 @@ GameObject:
   - 23: {fileID: 428661514}
   - 114: {fileID: 428661518}
   m_Layer: 0
-  m_Name: Cylinder
+  m_Name: testCylinder
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
