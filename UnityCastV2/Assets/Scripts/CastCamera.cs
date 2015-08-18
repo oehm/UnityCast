@@ -42,6 +42,9 @@ public class CastCamera : MonoBehaviour
 	public void HandleNativeMessage ( string message )
 	{
 
+		if ( debugObject != null )
+			debugObject.GetComponent<Renderer>( ).material.color = Color.yellow;
+
 		string[] parameter = message.Split( ',' );
 
 		if ( parameter.Length > 0 )
@@ -56,6 +59,8 @@ public class CastCamera : MonoBehaviour
 
 	private void SetResolution (int displayIndex, int width, int height )
 	{
+		Debug.Log( "idx: " + displayIndex + " width: " + width + " height: " + height );
+
 		if ( displayIndex == _displayIndex && _displayIndex < Display.displays.Length )
 		{
 			Display.displays[_displayIndex].SetRenderingResolution( width, height );

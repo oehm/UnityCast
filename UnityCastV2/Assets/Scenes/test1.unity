@@ -271,7 +271,7 @@ GameObject:
   - 92: {fileID: 1260882077}
   - 114: {fileID: 1260882076}
   m_Layer: 0
-  m_Name: Cast Camera
+  m_Name: Cast Camera 1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
