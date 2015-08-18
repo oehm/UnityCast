@@ -2,75 +2,72 @@
 using System.Collections;
 using System;
 
-[RequireComponent(typeof(Camera))]
+[RequireComponent( typeof( Camera ) )]
 public class CastCamera : MonoBehaviour
 {
-
-	public GameObject debugObject;
+	public readonly int displayIndex = 1;//hardcoded, if at some point casting to multiple displays is supported, change this.
 
 	private Camera _camera;
 	private Display _castDisplay;
 	private bool _isResolutionSet;
-	private int _displayIndex = 1;//hardcoded, if at some point casting to multiple displays is supported, change this.
 
-	private void Start ( )
+	private void OnEnable ( )
 	{
+		CastMessageHandler.AddCastCamera( this );
+
 		_camera = GetComponent<Camera>( );
 		_camera.enabled = false;
+		_castDisplay = null;
 		_isResolutionSet = false;
+	}
+
+	private void OnDisable ( )
+	{
+		CastMessageHandler.RemoveCastCamera( this );
+		_camera.enabled = false;
 	}
 
 	void Update ( )
 	{
 
-		if ( Display.displays.Length >= _displayIndex && _isResolutionSet && !_camera.enabled )
+		if ( Display.displays.Length >= displayIndex && _isResolutionSet && !_camera.enabled )
 		{
-			_castDisplay = Display.displays[_displayIndex];
+			//set up and enable the camera when the display becomes available
+
+			_castDisplay = Display.displays[displayIndex];
 			_camera.SetTargetBuffers( _castDisplay.colorBuffer, _castDisplay.depthBuffer );
 			_camera.enabled = true;
-
-			if ( debugObject != null )
-				debugObject.GetComponent<Renderer>( ).material.color = Color.green;
 		}
-		if ( Display.displays.Length < _displayIndex )
+
+		if ( Display.displays.Length < displayIndex )
 		{
+			//disable the camera when the display becomes unavailable
+
+			_castDisplay = null;
 			_camera.enabled = false;
+			_isResolutionSet = false;
 		}
 	}
 
-	//this gets called from android native code
-	public void HandleNativeMessage ( string message )
+	//sets the render resolution. called indirectly from android native code, to fit to the target screen.
+	public void SetResolution ( int width, int height )
 	{
-
-
-		string[] parameter = message.Split( ',' );
-
-		if ( parameter.Length > 0 )
+		if ( displayIndex < Display.displays.Length )
 		{
-			if ( parameter[0].Equals( "SetResolution" ) && parameter.Length == 3 )
-			{
-				if ( debugObject != null )
-					debugObject.GetComponent<Renderer>( ).material.color = Color.red;
+			//set the render resolution
+			Display.displays[displayIndex].SetRenderingResolution( width, height );
+			_isResolutionSet = true;
 
-				SetResolution( int.Parse( parameter[1] ), int.Parse( parameter[2] ), int.Parse( parameter[3] ) );
+			if ( _castDisplay != null )
+			{
+				//if a cast display is already in use, let the camera reset.
+				_camera.enabled = false;
 			}
 		}
-
-	}
-
-	private void SetResolution (int displayIndex, int width, int height )
-	{
-		Debug.Log( "idx: " + displayIndex + " width: " + width + " height: " + height );
-
-		if ( displayIndex == _displayIndex && _displayIndex < Display.displays.Length )
+		else
 		{
-			Display.displays[_displayIndex].SetRenderingResolution( width, height );
-
-			if ( debugObject != null )
-				debugObject.GetComponent<Renderer>( ).material.color = Color.yellow;
+			Debug.LogError( "Android native code tried to set the resolution of display " + displayIndex + ", which is not available." );
 		}
-
-		_isResolutionSet = true;
 	}
 
 }
