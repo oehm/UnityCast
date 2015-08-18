@@ -12,7 +12,7 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/StartButtton"
+        android:text="@string/start_local"
         android:id="@+id/button"
         android:onClick="startUnity"
         android:layout_alignParentBottom="true"
@@ -24,7 +24,7 @@
         android:layout_width="wrap_content"
         android:gravity="center_vertical|center_horizontal"
         android:layout_centerInParent="true"
-        custom:buttonText="@string/play"
+        custom:buttonText="@string/start_stream"
         android:background="@drawable/orange_button"
         android:paddingTop="1dp"
         android:paddingBottom="1dp"

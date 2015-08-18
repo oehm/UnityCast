@@ -28,7 +28,7 @@
               android:layout_centerVertical="true"
               android:textAppearance="?android:attr/textAppearanceMedium"
               android:textColor="@color/white"
-              android:text="@string/play"
+              android:text="@string/start_stream"
               android:textAllCaps="true"/>
 
 </merge>

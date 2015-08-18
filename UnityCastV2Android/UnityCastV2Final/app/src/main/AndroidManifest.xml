@@ -39,8 +39,7 @@
 
         <activity
             android:name=".MainActivity"
-            android:label="@string/app_name"
-            android:screenOrientation="portrait" >
+            android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -63,16 +62,11 @@
             android:name=".CastingActivity"
             android:configChanges="orientation"
             android:label="@string/app_name"
-            android:launchMode="singleTop"
             android:screenOrientation="portrait" >
-            <meta-data
-                android:name="unityplayer.UnityActivity"
-                android:value="true" />
+            <!--<meta-data-->
+                <!--android:name="unityplayer.UnityActivity"-->
+                <!--android:value="true" />-->
         </activity>
-
-        <!--<service-->
-            <!--android:name=".PresentationService"-->
-            <!--android:exported="false" />-->
 
         <service
             android:name=".UnityPresentationService"

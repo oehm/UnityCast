@@ -1,11 +1,18 @@
 package com.oehm.unitycastv2;
 
 import android.content.Context;
+import android.content.res.Configuration;
+import android.graphics.Rect;
 import android.os.Bundle;
+import android.support.v7.media.MediaRouter;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
+import android.view.SurfaceHolder;
+import android.view.SurfaceView;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.FrameLayout;
 
 import com.google.android.gms.cast.CastPresentation;
 import com.google.android.gms.cast.CastRemoteDisplayLocalService;
@@ -38,10 +45,6 @@ public class UnityPresentationService extends CastRemoteDisplayLocalService
     }
 
     private void dismissPresentation() {
-
-//        if(mUnityPlayer != null){
-//            mUnityPlayer.quit();
-//        }
 
         if (mPresentation != null) {
             mPresentation.dismiss();
@@ -85,12 +88,15 @@ public class UnityPresentationService extends CastRemoteDisplayLocalService
             super.onCreate(savedInstanceState);
             //set Content on tv
             if(mUnityPlayer != null){
-//                setContentView(R.layout.presentation_main);
 
-                setContentView(mUnityPlayer);
-                mUnityPlayer.requestFocus();
-                mUnityPlayer.resume();
-                Log.d(TAG, "unity player was ALMOST set as content view.");
+                setContentView(R.layout.presentation_main);
+
+                //attach unity to the surface
+                SurfaceView surfaceView = (SurfaceView) findViewById(R.id.surfaceViewPresentation);
+                surfaceView.getHolder().addCallback(new UnitySurfaceHolderCallback(mUnityPlayer, 1));
+
+
+                Log.d(TAG, "Chromecast should display stuff.");
 
             }
             else {
@@ -99,6 +105,26 @@ public class UnityPresentationService extends CastRemoteDisplayLocalService
                 Log.e(TAG, "unity player was not assigned in time.");
             }
 
+        }
+
+        @Override
+        protected void onStart() {
+            super.onStart();
+
+//            mUnityPlayer.resume();
+//            mUnityPlayer.windowFocusChanged(true);
+        }
+
+        @Override
+        protected void onStop() {
+//            mUnityPlayer.quit();
+            super.onStop();
+        }
+
+        @Override public void onWindowFocusChanged(boolean hasFocus)
+        {
+            super.onWindowFocusChanged(hasFocus);
+//            mUnityPlayer.windowFocusChanged(hasFocus);
         }
     }
 }

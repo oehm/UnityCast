@@ -21,20 +21,16 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.PixelFormat;
 import android.os.Bundle;
-import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.app.MediaRouteActionProvider;
 import android.support.v7.media.MediaRouteSelector;
 import android.support.v7.media.MediaRouter;
 import android.support.v7.media.MediaRouter.RouteInfo;
 import android.util.Log;
 import android.view.KeyEvent;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.MotionEvent;
-import android.view.View;
+import android.view.SurfaceHolder;
+import android.view.SurfaceView;
 import android.view.Window;
-import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.google.android.gms.cast.CastDevice;
@@ -62,15 +58,17 @@ import com.unity3d.player.UnityPlayer;
  */
 public class CastingActivity extends AppCompatActivity
 {
-    protected UnityPlayer mUnityPlayer; // don't change the name of this variable; referenced from native code
+    protected UnityPlayer mUnityPlayer;
 
     private final String TAG = "CastingActivity";
 
-    // MediaRouter
     private MediaRouter mMediaRouter;
     private MediaRouteSelector mMediaRouteSelector;
 
     private CastDevice mCastDevice;
+
+    private SurfaceHolder mSurfaceHolder;
+    private SurfaceHolder.Callback mSurfaceHolderCallback;
 
     /**
      * Initialization of the Activity after it is first created. Must at least
@@ -80,6 +78,7 @@ public class CastingActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
+
         requestWindowFeature(Window.FEATURE_NO_TITLE);
 
         super.onCreate(savedInstanceState);
@@ -87,17 +86,28 @@ public class CastingActivity extends AppCompatActivity
         getWindow().setFormat(PixelFormat.RGBX_8888); // <--- This makes xperia play happy
 
         mUnityPlayer = new UnityPlayer(this);
-        if (mUnityPlayer.getSettings ().getBoolean ("hide_status_bar", true))
-        {
-            getWindow ().setFlags (WindowManager.LayoutParams.FLAG_FULLSCREEN,
-                    WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        }
+//        if (mUnityPlayer.getSettings ().getBoolean ("hide_status_bar", true))
+//        {
+//            getWindow ().setFlags (WindowManager.LayoutParams.FLAG_FULLSCREEN,
+//                    WindowManager.LayoutParams.FLAG_FULLSCREEN);
+//        }
 
 //        setContentView(mUnityPlayer);
-        mUnityPlayer.requestFocus();
 
         setContentView(R.layout.activity_casting);
 
+        SurfaceView surfaceView = (SurfaceView) findViewById(R.id.surfaceViewActivity);
+        mSurfaceHolder = surfaceView.getHolder();
+
+        mSurfaceHolderCallback = new UnitySurfaceHolderCallback(mUnityPlayer, 0);
+
+        mSurfaceHolder.addCallback(mSurfaceHolderCallback);
+
+        mUnityPlayer.requestFocus();
+
+
+
+        //setup casting control
         mMediaRouter = MediaRouter.getInstance(getApplicationContext());
         mMediaRouteSelector = new MediaRouteSelector.Builder()
                 .addControlCategory(
@@ -106,9 +116,8 @@ public class CastingActivity extends AppCompatActivity
         if (isRemoteDisplaying()) {
             // The Activity has been recreated and we have an active remote display session,
             // so we need to set the selected device instance
-            CastDevice castDevice = CastDevice
+            mCastDevice = CastDevice
                     .getFromBundle(mMediaRouter.getSelectedRoute().getExtras());
-            mCastDevice = castDevice;
         } else {
             Bundle extras = getIntent().getExtras();
             if (extras != null) {
@@ -120,37 +129,24 @@ public class CastingActivity extends AppCompatActivity
                 MediaRouter.CALLBACK_FLAG_REQUEST_DISCOVERY);
     }
 
-    /**
-     * Create the toolbar menu with the cast button.
-     */
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        super.onCreateOptionsMenu(menu);
-        getMenuInflater().inflate(R.menu.menu, menu);
-        MenuItem mediaRouteMenuItem = menu.findItem(R.id.media_route_menu_item);
-        MediaRouteActionProvider mediaRouteActionProvider =
-                (MediaRouteActionProvider) MenuItemCompat.getActionProvider(mediaRouteMenuItem);
-        mediaRouteActionProvider.setRouteSelector(mMediaRouteSelector);
-        // Return true to show the menu.
-        return true;
-    }
-
     @Override
     protected void onResume() {
         super.onResume();
+        mUnityPlayer.resume();
+
         if (!isRemoteDisplaying()) {
             if (mCastDevice != null) {
                 startCastService(mCastDevice);
             }
         }
-        mUnityPlayer.resume();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        mMediaRouter.unselect(MediaRouter.UNSELECT_REASON_STOPPED);
         mUnityPlayer.pause();
+
+        mMediaRouter.unselect(MediaRouter.UNSELECT_REASON_STOPPED);
     }
 
     @Override
@@ -175,6 +171,7 @@ public class CastingActivity extends AppCompatActivity
         mUnityPlayer.windowFocusChanged(hasFocus);
     }
 
+
     // For some reason the multiple keyevent type is not supported by the ndk.
     // Force event injection by overriding dispatchKeyEvent().
     @Override public boolean dispatchKeyEvent(KeyEvent event)
@@ -190,13 +187,14 @@ public class CastingActivity extends AppCompatActivity
     @Override public boolean onTouchEvent(MotionEvent event)          { return mUnityPlayer.injectEvent(event); }
     /*API12*/ public boolean onGenericMotionEvent(MotionEvent event)  { return mUnityPlayer.injectEvent(event); }
 
+
     private boolean isRemoteDisplaying() {
         return CastRemoteDisplayLocalService.getInstance() != null;
     }
 
     private void initError() {
         Toast toast = Toast.makeText(
-                getApplicationContext(), R.string.init_error, Toast.LENGTH_SHORT);
+                getApplicationContext(), R.string.stream_display_message, Toast.LENGTH_SHORT);
         mMediaRouter.selectRoute(mMediaRouter.getDefaultRoute());
         toast.show();
     }
@@ -261,4 +259,25 @@ public class CastingActivity extends AppCompatActivity
                 });
     }
 
+
+
 }
+
+//
+//if(mSurfaceHolder.getSurface().isValid()){
+//        Canvas canvas = mSurfaceHolder.lockCanvas();
+//        Paint paint = new Paint();
+//        paint.setColor(Color.BLUE);
+//        paint.setStrokeWidth(10);
+//
+//        paint.setStyle(Paint.Style.STROKE);
+//        canvas.drawCircle(50, 50, 30, paint);
+//
+//        paint.setStyle(Paint.Style.FILL);
+//        canvas.drawCircle(300, 300, 200, paint);
+//
+//        mSurfaceHolder.unlockCanvasAndPost(canvas);
+//        }
+//        else {
+//        Log.e(TAG, "Surface not valid");
+//        }
