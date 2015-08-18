@@ -116,7 +116,7 @@ MeshRenderer:
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_Materials:
-  - {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: daa44d541113c274084dd8af411927cc, type: 2}
   m_SubsetIndices: 
   m_StaticBatchRoot: {fileID: 0}
   m_UseLightProbes: 1
@@ -271,7 +271,7 @@ GameObject:
   - 92: {fileID: 1260882077}
   - 114: {fileID: 1260882076}
   m_Layer: 0
-  m_Name: Camera
+  m_Name: Cast Camera
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -288,6 +288,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 07fd3a9ea2f7ef042bead66d09f3c956, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  debugObject: {fileID: 428661513}
 --- !u!92 &1260882077
 Behaviour:
   m_ObjectHideFlags: 0
