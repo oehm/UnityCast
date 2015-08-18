@@ -106,25 +106,5 @@ public class UnityPresentationService extends CastRemoteDisplayLocalService
             }
 
         }
-
-        @Override
-        protected void onStart() {
-            super.onStart();
-
-//            mUnityPlayer.resume();
-//            mUnityPlayer.windowFocusChanged(true);
-        }
-
-        @Override
-        protected void onStop() {
-//            mUnityPlayer.quit();
-            super.onStop();
-        }
-
-        @Override public void onWindowFocusChanged(boolean hasFocus)
-        {
-            super.onWindowFocusChanged(hasFocus);
-//            mUnityPlayer.windowFocusChanged(hasFocus);
-        }
     }
 }
