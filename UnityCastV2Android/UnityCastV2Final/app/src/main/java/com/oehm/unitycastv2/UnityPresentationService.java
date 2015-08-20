@@ -20,11 +20,9 @@ import com.unity3d.player.UnityPlayer;
 
 public class UnityPresentationService extends CastRemoteDisplayLocalService
 {
+    public UnityPlayer mUnityPlayer;
 
     private static final String TAG = "UnityPresentationServic";
-
-
-    public UnityPlayer mUnityPlayer;
 
     private CastPresentation mPresentation;
 
@@ -55,9 +53,7 @@ public class UnityPresentationService extends CastRemoteDisplayLocalService
     private void createPresentation(Display display) {
 
         dismissPresentation();
-
         mPresentation = new UnityCastPresentation(this, display);
-
         try {
             mPresentation.show();
         } catch (WindowManager.InvalidDisplayException ex) {
@@ -92,8 +88,9 @@ public class UnityPresentationService extends CastRemoteDisplayLocalService
                 setContentView(R.layout.presentation_main);
 
                 //attach unity to the surface
+                int displayIndex = 1;
                 SurfaceView surfaceView = (SurfaceView) findViewById(R.id.surfaceViewPresentation);
-                surfaceView.getHolder().addCallback(new UnitySurfaceHolderCallback(mUnityPlayer, 1));
+                surfaceView.getHolder().addCallback(new UnitySurfaceHolderCallback(mUnityPlayer, displayIndex));
 
 
                 Log.d(TAG, "Chromecast should display stuff.");

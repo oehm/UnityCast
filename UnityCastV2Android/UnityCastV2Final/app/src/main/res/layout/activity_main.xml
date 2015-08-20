@@ -14,7 +14,7 @@
         android:layout_height="wrap_content"
         android:text="@string/start_local"
         android:id="@+id/button"
-        android:onClick="startUnity"
+        android:onClick="startUnityLocalOnly"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true" />
 

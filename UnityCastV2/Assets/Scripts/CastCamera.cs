@@ -30,7 +30,7 @@ public class CastCamera : MonoBehaviour
 	void Update ( )
 	{
 
-		if ( Display.displays.Length >= displayIndex && _isResolutionSet && !_camera.enabled )
+		if ( Display.displays.Length > displayIndex && _isResolutionSet && !_camera.enabled )
 		{
 			//set up and enable the camera when the display becomes available
 
@@ -66,7 +66,7 @@ public class CastCamera : MonoBehaviour
 		}
 		else
 		{
-			Debug.LogError( "Android native code tried to set the resolution of display " + displayIndex + ", which is not available." );
+			Debug.LogError( name + ": Tried to set the resolution of display " + displayIndex + ", which is not available." );
 		}
 	}
 

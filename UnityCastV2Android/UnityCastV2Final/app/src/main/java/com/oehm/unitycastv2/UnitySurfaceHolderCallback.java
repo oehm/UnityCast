@@ -16,15 +16,14 @@ public class UnitySurfaceHolderCallback implements SurfaceHolder.Callback {
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
-        mUnityPlayer.displayChanged(mDisplayIndex, holder.getSurface());
     }
 
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
 
         mUnityPlayer.displayChanged(mDisplayIndex, holder.getSurface());
-
-        UnityPlayer.UnitySendMessage("Cast Message Handler", "HandleNativeMessage", "SetResolution" + "," + mDisplayIndex + "," + width + "," + height);
+        UnityPlayer.UnitySendMessage("Cast Message Handler", "HandleNativeMessage",
+                "SetResolution" + "," + mDisplayIndex + "," + width + "," + height);
     }
 
     @Override

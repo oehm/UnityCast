@@ -48,6 +48,8 @@ public class CastMessageHandler : MonoBehaviour //this should be a singleton in 
 				}
 
 			}
+
+			//handle future other messages here
 		}
 	}
 }

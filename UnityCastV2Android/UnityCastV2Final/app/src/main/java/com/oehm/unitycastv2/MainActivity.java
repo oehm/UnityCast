@@ -32,15 +32,30 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        checkGooglePlayServices();
 
+        // check for GooglePlayServices
+        int googlePlayServicesCheck = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
+        if (googlePlayServicesCheck != ConnectionResult.SUCCESS) {
+
+            Dialog dialog = GooglePlayServicesUtil.getErrorDialog(googlePlayServicesCheck, this, 0);
+            dialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+                @Override
+                public void onCancel(DialogInterface dialogInterface) {
+                    finish();
+                }
+            });
+            dialog.show();
+        }
+
+        // set the view
         setContentView(R.layout.activity_main);
 
+        // create the MediaRouter and the MediaRouteSelector
+        mMediaRouter = MediaRouter.getInstance(getApplicationContext());
         mMediaRouteSelector = new MediaRouteSelector.Builder()
                 .addControlCategory(
                         CastMediaControlIntent.categoryForCast(getString(R.string.remote_display_app_id)))
                 .build();
-        mMediaRouter = MediaRouter.getInstance(getApplicationContext());
 
         // Set the MediaRouteButton selector for device discovery.
         mMediaRouterButtonView = (MediaRouterButtonView) findViewById(R.id.media_route_button_view);
@@ -102,34 +117,10 @@ public class MainActivity extends AppCompatActivity {
                 }
             };
 
-    public void startUnity(View view) {
+    public void startUnityLocalOnly(View view) {
         // Do something in response to button
-
-        Intent intent = new Intent(this, UnityPlayerActivity.class);
+        Intent intent = new Intent(MainActivity.this,
+                CastingActivity.class);
         startActivity(intent);
     }
-
-    /**
-     * A utility method to validate that the appropriate version of the Google Play Services is
-     * available on the device. If not, it will open a dialog to address the issue. The dialog
-     * displays a localized message about the error and upon user confirmation (by tapping on
-     * dialog) will direct them to the Play Store if Google Play services is out of date or
-     * missing, or to system settings if Google Play services is disabled on the device.
-     */
-    private boolean checkGooglePlayServices() {
-        int googlePlayServicesCheck = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
-        if (googlePlayServicesCheck == ConnectionResult.SUCCESS) {
-            return true;
-        }
-        Dialog dialog = GooglePlayServicesUtil.getErrorDialog(googlePlayServicesCheck, this, 0);
-        dialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
-            @Override
-            public void onCancel(DialogInterface dialogInterface) {
-                finish();
-            }
-        });
-        dialog.show();
-        return false;
-    }
-
 }

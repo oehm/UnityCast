@@ -28,9 +28,7 @@ import android.support.v7.media.MediaRouter.RouteInfo;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
-import android.view.SurfaceHolder;
 import android.view.SurfaceView;
-import android.view.Window;
 import android.widget.Toast;
 
 import com.google.android.gms.cast.CastDevice;
@@ -67,52 +65,32 @@ public class CastingActivity extends AppCompatActivity
 
     private CastDevice mCastDevice;
 
-    private SurfaceHolder mSurfaceHolder;
-    private SurfaceHolder.Callback mSurfaceHolderCallback;
-
-    /**
-     * Initialization of the Activity after it is first created. Must at least
-     * call {@link android.app.Activity#setContentView setContentView()} to
-     * describe what is to be displayed in the screen.
-     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
-
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
 
         super.onCreate(savedInstanceState);
 
         getWindow().setFormat(PixelFormat.RGBX_8888); // <--- This makes xperia play happy
 
+        //setup unity and the view
         mUnityPlayer = new UnityPlayer(this);
-//        if (mUnityPlayer.getSettings ().getBoolean ("hide_status_bar", true))
-//        {
-//            getWindow ().setFlags (WindowManager.LayoutParams.FLAG_FULLSCREEN,
-//                    WindowManager.LayoutParams.FLAG_FULLSCREEN);
-//        }
-
-//        setContentView(mUnityPlayer);
-
         setContentView(R.layout.activity_casting);
 
+        //attach unity to the surface
+        int displayIndex = 0;
         SurfaceView surfaceView = (SurfaceView) findViewById(R.id.surfaceViewActivity);
-        mSurfaceHolder = surfaceView.getHolder();
-
-        mSurfaceHolderCallback = new UnitySurfaceHolderCallback(mUnityPlayer, 0);
-
-        mSurfaceHolder.addCallback(mSurfaceHolderCallback);
+        surfaceView.getHolder().addCallback(new UnitySurfaceHolderCallback(mUnityPlayer, displayIndex));//
 
         mUnityPlayer.requestFocus();
 
-
-
-        //setup casting control
+        // create the MediaRouter and the MediaRouteSelector
         mMediaRouter = MediaRouter.getInstance(getApplicationContext());
         mMediaRouteSelector = new MediaRouteSelector.Builder()
                 .addControlCategory(
                         CastMediaControlIntent.categoryForCast(getString(R.string.remote_display_app_id)))
                 .build();
+
+        //get the CastDevice
         if (isRemoteDisplaying()) {
             // The Activity has been recreated and we have an active remote display session,
             // so we need to set the selected device instance
@@ -124,16 +102,33 @@ public class CastingActivity extends AppCompatActivity
                 mCastDevice = extras.getParcelable(MainActivity.INTENT_EXTRA_CAST_DEVICE);
             }
         }
+    }
 
+    // Quit Unity
+    @Override protected void onDestroy ()
+    {
+        mUnityPlayer.quit();
+        mMediaRouter.unselect(MediaRouter.UNSELECT_REASON_STOPPED);
+        super.onDestroy();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
         mMediaRouter.addCallback(mMediaRouteSelector, mMediaRouterCallback,
                 MediaRouter.CALLBACK_FLAG_REQUEST_DISCOVERY);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        mMediaRouter.removeCallback(mMediaRouterCallback);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         mUnityPlayer.resume();
-
         if (!isRemoteDisplaying()) {
             if (mCastDevice != null) {
                 startCastService(mCastDevice);
@@ -145,17 +140,7 @@ public class CastingActivity extends AppCompatActivity
     protected void onPause() {
         super.onPause();
         mUnityPlayer.pause();
-
-        mMediaRouter.unselect(MediaRouter.UNSELECT_REASON_STOPPED);
     }
-
-    @Override
-    protected void onDestroy() {
-        mUnityPlayer.quit();
-        super.onDestroy();
-        mMediaRouter.removeCallback(mMediaRouterCallback);
-    }
-
 
     // This ensures the layout will be correct.
     @Override public void onConfigurationChanged(Configuration newConfig)
@@ -170,7 +155,6 @@ public class CastingActivity extends AppCompatActivity
         super.onWindowFocusChanged(hasFocus);
         mUnityPlayer.windowFocusChanged(hasFocus);
     }
-
 
     // For some reason the multiple keyevent type is not supported by the ndk.
     // Force event injection by overriding dispatchKeyEvent().
@@ -192,21 +176,8 @@ public class CastingActivity extends AppCompatActivity
         return CastRemoteDisplayLocalService.getInstance() != null;
     }
 
-    private void initError() {
-        Toast toast = Toast.makeText(
-                getApplicationContext(), R.string.stream_display_message, Toast.LENGTH_SHORT);
-        mMediaRouter.selectRoute(mMediaRouter.getDefaultRoute());
-        toast.show();
-    }
-
     private final MediaRouter.Callback mMediaRouterCallback =
             new MediaRouter.Callback() {
-                @Override
-                public void onRouteSelected(MediaRouter router, RouteInfo info) {
-                    // Should not happen since this activity will be closed if there
-                    // is no selected route
-                }
-
                 @Override
                 public void onRouteUnselected(MediaRouter router, RouteInfo info) {
                     if (isRemoteDisplaying()) {
@@ -235,8 +206,6 @@ public class CastingActivity extends AppCompatActivity
                     @Override
                     public void onRemoteDisplaySessionStarted(
                             CastRemoteDisplayLocalService service) {
-                        Log.d(TAG, "onServiceStarted");
-
                         UnityPresentationService unityService;
                         try {
                             unityService = (UnityPresentationService) service;
@@ -250,34 +219,10 @@ public class CastingActivity extends AppCompatActivity
 
                     @Override
                     public void onRemoteDisplaySessionError(Status errorReason) {
-                        Log.d(TAG, "onServiceError: " + errorReason.getStatusCode());
-                        initError();
-
+                        Log.e(TAG, "onServiceError: " + errorReason.getStatusCode());
                         mCastDevice = null;
                         CastingActivity.this.finish();
                     }
                 });
     }
-
-
-
 }
-
-//
-//if(mSurfaceHolder.getSurface().isValid()){
-//        Canvas canvas = mSurfaceHolder.lockCanvas();
-//        Paint paint = new Paint();
-//        paint.setColor(Color.BLUE);
-//        paint.setStrokeWidth(10);
-//
-//        paint.setStyle(Paint.Style.STROKE);
-//        canvas.drawCircle(50, 50, 30, paint);
-//
-//        paint.setStyle(Paint.Style.FILL);
-//        canvas.drawCircle(300, 300, 200, paint);
-//
-//        mSurfaceHolder.unlockCanvasAndPost(canvas);
-//        }
-//        else {
-//        Log.e(TAG, "Surface not valid");
-//        }
