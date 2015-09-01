@@ -34,10 +34,12 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         // check for GooglePlayServices
-        int googlePlayServicesCheck = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
+        int googlePlayServicesCheck =
+            GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
         if (googlePlayServicesCheck != ConnectionResult.SUCCESS) {
 
-            Dialog dialog = GooglePlayServicesUtil.getErrorDialog(googlePlayServicesCheck, this, 0);
+            Dialog dialog =
+                GooglePlayServicesUtil.getErrorDialog(googlePlayServicesCheck, this, 0);
             dialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
                 @Override
                 public void onCancel(DialogInterface dialogInterface) {
@@ -54,11 +56,13 @@ public class MainActivity extends AppCompatActivity {
         mMediaRouter = MediaRouter.getInstance(getApplicationContext());
         mMediaRouteSelector = new MediaRouteSelector.Builder()
                 .addControlCategory(
-                        CastMediaControlIntent.categoryForCast(getString(R.string.remote_display_app_id)))
+                        CastMediaControlIntent.categoryForCast(
+                                getString(R.string.remote_display_app_id)))
                 .build();
 
         // Set the MediaRouteButton selector for device discovery.
-        mMediaRouterButtonView = (MediaRouterButtonView) findViewById(R.id.media_route_button_view);
+        mMediaRouterButtonView =
+            (MediaRouterButtonView) findViewById(R.id.media_route_button_view);
         if (mMediaRouterButtonView != null) {
             mMediaRouteButton = mMediaRouterButtonView.getMediaRouteButton();
             mMediaRouteButton.setRouteSelector(mMediaRouteSelector);
@@ -79,43 +83,45 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private final MediaRouter.Callback mMediaRouterCallback =
-            new MediaRouter.Callback() {
-                @Override
-                public void onRouteAdded(MediaRouter router, MediaRouter.RouteInfo route) {
-                    if (++mRouteCount >= 1) {
-                        // Show the button when a device is discovered.
-                        if (mMediaRouterButtonView != null) {
-                            mMediaRouterButtonView.setVisibility(View.VISIBLE);
-                        }
+        new MediaRouter.Callback() {
+
+            @Override
+            public void onRouteAdded(MediaRouter router, MediaRouter.RouteInfo route) {
+                if (++mRouteCount >= 1) {
+                    // Show the button when a device is discovered.
+                    if (mMediaRouterButtonView != null) {
+                        mMediaRouterButtonView.setVisibility(View.VISIBLE);
                     }
                 }
+            }
 
-                @Override
-                public void onRouteRemoved(MediaRouter router, MediaRouter.RouteInfo route) {
-                    if (--mRouteCount <= 0) {
-                        // Hide the button if there are no devices discovered.
-                        if (mMediaRouterButtonView != null) {
-                            mMediaRouterButtonView.setVisibility(View.GONE);
-                        }
+            @Override
+            public void onRouteRemoved(MediaRouter router, MediaRouter.RouteInfo route) {
+                if (--mRouteCount <= 0) {
+                    // Hide the button if there are no devices discovered.
+                    if (mMediaRouterButtonView != null) {
+                        mMediaRouterButtonView.setVisibility(View.GONE);
                     }
                 }
+            }
 
-                @Override
-                public void onRouteSelected(MediaRouter router, MediaRouter.RouteInfo info) {
-                    Log.d(TAG, "onRouteSelected");
-                    CastDevice castDevice = CastDevice.getFromBundle(info.getExtras());
-                    if (castDevice != null) {
-                        Intent intent = new Intent(MainActivity.this,
-                                CastingActivity.class);
-                        intent.putExtra(INTENT_EXTRA_CAST_DEVICE, castDevice);
-                        startActivity(intent);
-                    }
+            @Override
+            public void onRouteSelected(MediaRouter router, MediaRouter.RouteInfo info) {
+                Log.d(TAG, "onRouteSelected");
+                CastDevice castDevice = CastDevice.getFromBundle(info.getExtras());
+                if (castDevice != null) {
+                    Intent intent = new Intent(MainActivity.this,
+                            CastingActivity.class);
+                    intent.putExtra(INTENT_EXTRA_CAST_DEVICE, castDevice);
+                    startActivity(intent);
                 }
+            }
 
-                @Override
-                public void onRouteUnselected(MediaRouter router, MediaRouter.RouteInfo info) {
-                }
-            };
+            @Override
+            public void onRouteUnselected(MediaRouter router, MediaRouter.RouteInfo info) {
+            }
+
+        };
 
     public void startUnityLocalOnly(View view) {
         // Do something in response to button

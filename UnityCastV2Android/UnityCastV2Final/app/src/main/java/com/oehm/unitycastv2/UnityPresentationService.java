@@ -82,26 +82,21 @@ public class UnityPresentationService extends CastRemoteDisplayLocalService
         @Override
         protected void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
+
+            setContentView(R.layout.presentation_main);
+
             //set Content on tv
             if(mUnityPlayer != null){
-
-                setContentView(R.layout.presentation_main);
-
                 //attach unity to the surface
                 int displayIndex = 1;
-                SurfaceView surfaceView = (SurfaceView) findViewById(R.id.surfaceViewPresentation);
-                surfaceView.getHolder().addCallback(new UnitySurfaceHolderCallback(mUnityPlayer, displayIndex));
-
-
-                Log.d(TAG, "Chromecast should display stuff.");
-
+                SurfaceView surfaceView =
+                        (SurfaceView) findViewById(R.id.surfaceViewPresentation);
+                surfaceView.getHolder().addCallback(
+                        new UnitySurfaceHolderCallback(mUnityPlayer, displayIndex));
             }
             else {
-
-                setContentView(R.layout.presentation_main);
                 Log.e(TAG, "unity player was not assigned in time.");
             }
-
         }
     }
 }

@@ -70,7 +70,8 @@ public class CastingActivity extends AppCompatActivity
 
         super.onCreate(savedInstanceState);
 
-        getWindow().setFormat(PixelFormat.RGBX_8888); // <--- This makes xperia play happy
+        // This makes xperia play happy
+        getWindow().setFormat(PixelFormat.RGBX_8888);
 
         //setup unity and the view
         mUnityPlayer = new UnityPlayer(this);
@@ -78,8 +79,10 @@ public class CastingActivity extends AppCompatActivity
 
         //attach unity to the surface
         int displayIndex = 0;
-        SurfaceView surfaceView = (SurfaceView) findViewById(R.id.surfaceViewActivity);
-        surfaceView.getHolder().addCallback(new UnitySurfaceHolderCallback(mUnityPlayer, displayIndex));//
+        SurfaceView surfaceView =
+                (SurfaceView) findViewById(R.id.surfaceViewActivity);
+        surfaceView.getHolder().addCallback(
+                new UnitySurfaceHolderCallback(mUnityPlayer, displayIndex));
 
         mUnityPlayer.requestFocus();
 
@@ -87,12 +90,14 @@ public class CastingActivity extends AppCompatActivity
         mMediaRouter = MediaRouter.getInstance(getApplicationContext());
         mMediaRouteSelector = new MediaRouteSelector.Builder()
                 .addControlCategory(
-                        CastMediaControlIntent.categoryForCast(getString(R.string.remote_display_app_id)))
+                    CastMediaControlIntent.categoryForCast(
+                        getString(R.string.remote_display_app_id)))
                 .build();
 
         //get the CastDevice
         if (isRemoteDisplaying()) {
-            // The Activity has been recreated and we have an active remote display session,
+            // The Activity has been recreated
+            // and we have an active remote display session,
             // so we need to set the selected device instance
             mCastDevice = CastDevice
                     .getFromBundle(mMediaRouter.getSelectedRoute().getExtras());
@@ -101,6 +106,7 @@ public class CastingActivity extends AppCompatActivity
             if (extras != null) {
                 mCastDevice = extras.getParcelable(MainActivity.INTENT_EXTRA_CAST_DEVICE);
             }
+
         }
     }
 

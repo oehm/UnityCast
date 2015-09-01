@@ -27,10 +27,10 @@ public class CastCamera : MonoBehaviour
 		_camera.enabled = false;
 	}
 
-	void Update ( )
+	private void Update ( )
 	{
-
-		if ( Display.displays.Length > displayIndex && _isResolutionSet && !_camera.enabled )
+		if ( Display.displays.Length > displayIndex 
+			&& _isResolutionSet && !_camera.enabled )
 		{
 			//set up and enable the camera when the display becomes available
 
